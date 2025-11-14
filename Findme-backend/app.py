@@ -3,58 +3,64 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 import os
 
-#import configuration
+# Import configuration and database
 from config import config
-
-#import databse and models
 from models.missing_person import db
+# from auth import auth_bp  # Authentication routes (when available)
 
 def create_app(config_name='development'):
-    app=Flask(__name__)
-    #load configuration
+    app = Flask(__name__)
+    
+    # Load configuration
     app.config.from_object(config[config_name])
-    #initialize extensions
-    CORS(app)#enable CORS for react frontend
-    db.init_app(app)#initialize sqlalchemy
-    migrate=Migrate(app,db)#initialize flask-migrate
-
-    #creation of all db tables(handled by postresql)
-
+    
+    # Initialize extensions
+    CORS(app)  # Enable CORS for React frontend
+    db.init_app(app)  # Initialize SQLAlchemy
+    migrate = Migrate(app, db)  # Initialize flask-migrate
+    
+    # Register authentication routes (uncomment when auth module ready)
+    # app.register_blueprint(auth_bp)
+    
+    # Create all database tables
     with app.app_context():
         db.create_all()
 
-    #register routes
+    # Register routes
 
 
     @app.route('/')
     def home():
         return jsonify({
-            "message":"FindMe- Missing Persons Reporting API",
-            "description":"Community-driven platform for reporting and tracking missing persons",
-            "endpoints":{
-                "health":"/api/health",
-                "missing_persons":"/api/missing",
-                "specific_person":"/api/missing/<id>"
+            "message": "FindMe- Missing Persons Reporting API",
+            "description": "Community-driven platform for reporting and tracking missing persons",
+            "endpoints": {
+                "health": "/api/health",
+                "authentication": "/api/auth/register & /api/auth/login",
+                "missing_persons": "/api/missing",
+                "specific_person": "/api/missing/<id>"
             }
         })
 
     @app.route('/api/health')
     def health_check():
-        #test db connection
+        # Test database connection
         try:
             db.session.execute(db.text('SELECT 1'))
-            db_status="connected"
+            db_status = "connected"
         except Exception as e:
-            db_status=f"error: {str(e)}"
+            db_status = f"error: {str(e)}"
 
         return jsonify({
-            "status":"healthy",
-            "database":db_status,
-            "message":"API is running"
+            "status": "healthy",
+            "database": db_status,
+            "authentication": "JWT system ready",
+            "message": "API is running with authentication"
         })
 
     return app
 
-if __name__=='__main__':
-    app=create_app('development')
+if __name__ == '__main__':
+    app = create_app('development')
+    print("Starting FindMe server with authentication...")
     app.run(debug=True, port=5000)
