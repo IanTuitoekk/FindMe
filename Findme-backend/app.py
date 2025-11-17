@@ -19,7 +19,7 @@ def create_app(config_name='development'):
     app.config["JWT_TOKEN_LOCATION"] = ["headers"]
 
     # Initialize extensions
-    CORS(app)  # Enable CORS for React frontend
+    CORS(app, origins=["https://find-me-ashen.vercel.app"])
     db.init_app(app)  # Initialize SQLAlchemy
     migrate = Migrate(app, db)  # Initialize flask-migrate
 
