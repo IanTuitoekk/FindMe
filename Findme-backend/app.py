@@ -11,16 +11,25 @@ from routes.auth import auth_bp  # authentication routes for user management
 def create_app(config_name='development'):
     app = Flask(__name__)
     
-    # load configuration settings for the application
+    # Load configuration
     app.config.from_object(config[config_name])
-    
-    # initialize extensions and middleware
-    CORS(app)  # enable cross-origin requests for frontend communication
-    db.init_app(app)  # connect sqlalchemy to our flask application
-    migrate = Migrate(app, db)  # set up database migrations for schema changes
-    
-    # register authentication routes for user login and registration
-    app.register_blueprint(auth_bp)
+
+    # JWT configuration
+    app.config["JWT_SECRET_KEY"] = "your-secret-key"  # I will Change to a secure value in production later 
+    app.config["JWT_TOKEN_LOCATION"] = ["headers"]
+
+    # Initialize extensions
+    CORS(app)  # Enable CORS for React frontend
+    db.init_app(app)  # Initialize SQLAlchemy
+    migrate = Migrate(app, db)  # Initialize flask-migrate
+
+    # Initialize JWTManager
+    from flask_jwt_extended import JWTManager
+    jwt = JWTManager(app)
+
+    # Register missing persons routes
+    from routes.missing_persons import missing_persons_bp
+    app.register_blueprint(missing_persons_bp)
 
     # create all database tables when the application starts
     with app.app_context():

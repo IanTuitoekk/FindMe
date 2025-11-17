@@ -79,76 +79,58 @@ pip freeze > requirements.txt
 
 ---
 
-### 👤 Person 2: Elijah - Missing Persons CRUD
+
+### 👤 Person 2: Elijah Kamanga - Missing Persons CRUD
 **Branch:** `elijah-dev` → `dev` → `main`
 
-**Responsibilities:**
-1. Missing person reports creation and management
-2. File upload for photos (Cloudinary or local storage)
-3. Data validation for reports
-4. MissingPerson model implementation
+**Responsibilities & Achievements:**
+- Designed and implemented the `MissingPerson` model with all required fields and relationships.
+- Built and tested all CRUD endpoints:
+  - `POST /api/missing-persons` (Create report)
+  - `GET /api/missing-persons` (List all reports)
+  - `GET /api/missing-persons/:id` (Get report by ID)
+  - `PUT /api/missing-persons/:id` (Update report/status)
+  - `DELETE /api/missing-persons/:id` (Remove report, admin only)
+- Integrated JWT authentication for protected routes (create, update, delete).
+- Implemented Marshmallow schema for robust data validation (all model fields, custom rules).
+- Removed manual required field checks for cleaner validation.
+- Integrated Cloudinary for secure photo uploads in missing person reports:
+  - Accepts image files via API, uploads to Cloudinary, stores URL in database.
+  - API responses now include `photo_url` for each report.
+- Automated tests for all endpoints using `pytest` and Qodo:
+  - Covers success, validation errors, not found, and auth requirements.
+  - Uses in-memory SQLite for test isolation.
+- All endpoints tested in Postman and confirmed working.
+- Database schema and migrations updated to support new fields (including `photo_url`).
 
-**Endpoints to Build:**
-```
-POST   /api/missing-persons           - Create missing person report
-GET    /api/missing-persons           - Get all missing persons (paginated)
-GET    /api/missing-persons/:id       - Get specific person details
-PUT    /api/missing-persons/:id       - Update report status
-DELETE /api/missing-persons/:id       - Remove report (admin only)
-```
-
-**Files You Own:**
+**Files Owned & Updated:**
 ```
 Findme-backend/
-  ├── models/missing_person.py        ✅ DONE - MissingPerson model
-  ├── routes/missing_persons.py       ✏️ CREATE - CRUD endpoints
-  ├── controllers/missing_persons_controller.py  ✏️ CREATE - CRUD logic
-  └── tests/test_missing_persons.py   ✏️ CREATE - CRUD tests
+  ├── models/missing_person.py        ✅ DONE - Model & serialization
+  ├── routes/missing_persons.py       ✅ DONE - CRUD endpoints
+  ├── controllers/missing_persons_controller.py  ✅ DONE - Business logic
+  ├── schemas/missing_person_schema.py ✅ DONE - Validation
+  ├── utils/cloudinary_helper.py      ✅ DONE - Cloudinary integration
+  └── tests/test_api.py               ✅ DONE - Automated tests
 ```
 
-**Model Fields (MissingPerson):**
-```python
-- id (Primary Key)
-- full_name (required)
-- age (required)
-- gender (required)
-- height, weight
-- hair_color, eye_color
-- distinguishing_features (text)
-- last_seen_date (required)
-- last_seen_location (required)
-- last_seen_wearing (text)
-- contact_name (required)
-- contact_phone (required)
-- contact_email
-- status (default: 'missing')
-- case_number (unique)
-- additional_info (text)
-- photo_url (for Cloudinary)
-- created_at, updated_at (auto)
-```
+**Key Features Delivered:**
+- Full CRUD for missing persons
+- JWT-protected endpoints
+- Cloudinary photo upload & storage
+- Marshmallow validation for all fields
+- Automated test suite (pytest/Qodo)
+- API response includes image URL
+- Database migrations for new fields
 
-**Dependencies to Add:**
-```
-cloudinary==1.36.0
-python-magic==0.4.27
-```
+**How to Test:**
+- Use Postman or frontend to create, update, and fetch reports (with images)
+- Run `pytest -q` in `Findme-backend` to verify all tests pass
 
-**Setup Instructions:**
-```bash
-# Your branch already exists
-git checkout elijah-dev
-git pull origin elijah-dev
+**Next Steps:**
+- Expand tests for edge cases
+- Finalize API documentation in README
 
-# Create remaining files
-touch Findme-backend/routes/missing_persons.py
-touch Findme-backend/controllers/missing_persons_controller.py
-touch Findme-backend/tests/test_missing_persons.py
-
-# Install your dependencies
-pip install cloudinary==1.36.0 python-magic==0.4.27
-pip freeze > requirements.txt
-```
 
 ---
 
