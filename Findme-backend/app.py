@@ -27,9 +27,13 @@ def create_app(config_name='development'):
     from flask_jwt_extended import JWTManager
     jwt = JWTManager(app)
 
-    # Register missing persons routes
+    # Register blueprints
     from routes.missing_persons import missing_persons_bp
-    app.register_blueprint(missing_persons_bp)
+    from routes.search import search_bp  # Import search routes
+    
+    app.register_blueprint(auth_bp)  # Register auth blueprint
+    app.register_blueprint(missing_persons_bp)  # Register missing persons routes
+    app.register_blueprint(search_bp)  # Register search routes
 
     # create all database tables when the application starts
     with app.app_context():
@@ -45,7 +49,11 @@ def create_app(config_name='development'):
                 "health": "/api/health",
                 "authentication": "/api/auth/register & /api/auth/login & /api/auth/me",
                 "missing_persons": "/api/missing",
-                "specific_person": "/api/missing/<id>"
+                "specific_person": "/api/missing/<id>",
+                "search": "/api/search?name=...&location=...&age_min=...&age_max=...&gender=...&status=...",
+                "filter_location": "/api/missing-persons/location/<city>",
+                "recent_reports": "/api/missing-persons/recent",
+                "statistics": "/api/missing-persons/stats"
             }
         })
 
@@ -62,7 +70,8 @@ def create_app(config_name='development'):
             "status": "healthy",
             "database": db_status,
             "authentication": "JWT system active with PostgreSQL",
-            "message": "API is running with complete authentication system"
+            "search_system": "Advanced search and filter system active",
+            "message": "API is running with complete authentication and search system"
         })
 
     return app
@@ -70,5 +79,5 @@ def create_app(config_name='development'):
 if __name__ == '__main__':
     # start the flask development server
     app = create_app('development')
-    print("starting FindMe server with complete authentication system...")
+    print("starting FindMe server with complete authentication and search system...")
     app.run(debug=True, port=5000)
