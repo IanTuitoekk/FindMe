@@ -1,0 +1,13 @@
+# This file is required for Render deployment. It installs all backend dependencies.
+# Copying from Findme-backend/requirements.txt
+
+flask
+flask-cors
+flask-migrate
+flask-jwt-extended
+flask-sqlalchemy
+psycopg2-binary
+python-dotenv
+cloudinary
+pytest
+flask-bcrypt

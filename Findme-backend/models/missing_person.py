@@ -1,9 +1,15 @@
-from .db import db
-import datetime
+
+# models/missing_person.py
+
+from datetime import datetime
+from .db import db  # Use shared SQLAlchemy instance
 
 class MissingPerson(db.Model):
     __tablename__ = 'missing_persons'
-    
+
+    # Link each report to the user who created it
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(100), nullable=False)
     age = db.Column(db.Integer, nullable=False)
@@ -13,18 +19,25 @@ class MissingPerson(db.Model):
     hair_color = db.Column(db.String(50))
     eye_color = db.Column(db.String(50))
     distinguishing_features = db.Column(db.Text)
+
     last_seen_date = db.Column(db.DateTime, nullable=False)
     last_seen_location = db.Column(db.String(200), nullable=False)
     last_seen_wearing = db.Column(db.Text)
+
     contact_name = db.Column(db.String(100), nullable=False)
     contact_phone = db.Column(db.String(20), nullable=False)
     contact_email = db.Column(db.String(100))
+
     status = db.Column(db.String(20), default='missing')
     case_number = db.Column(db.String(50), unique=True)
     additional_info = db.Column(db.Text)
     photo_url = db.Column(db.String(300))
-    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship to user
+    user = db.relationship("User", backref="reports")
 
     def __init__(self, **kwargs):
         for field in kwargs:
@@ -34,6 +47,7 @@ class MissingPerson(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "user_id": self.user_id,
             "full_name": self.full_name,
             "age": self.age,
             "gender": self.gender,
@@ -55,6 +69,3 @@ class MissingPerson(db.Model):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
-    
-    def __repr__(self):
-        return f'<MissingPerson {self.full_name} - Case {self.case_number}>'

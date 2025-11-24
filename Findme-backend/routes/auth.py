@@ -4,34 +4,37 @@ import datetime
 from models.db import db, bcrypt
 from models.user import User
 
+# create authentication blueprint
 auth_bp = Blueprint('auth', __name__)
 SECRET_KEY = "findme-secret-key-2024"  # this secret key signs and verifies jwt tokens
 
 @auth_bp.route('/api/auth/register', methods=['POST'])
 def register():
+    """handle user registration with jwt token generation"""
     try:
         data = request.get_json()  # get json data sent in the request
         
-        # make sure the user gave all required fields
+        # validate required fields
         if not data.get('name') or not data.get('email') or not data.get('password'):
             return jsonify({'error': 'name, email and password are required'}), 400
         
-        # check if this email already belongs to another user
+        # check if user already exists
         existing_user = User.query.filter_by(email=data['email']).first()
         if existing_user:
             return jsonify({'error': 'a user with this email already exists'}), 400
         
-        # create a new user using the data provided
+        # create new user
         new_user = User(
             name=data['name'],
             email=data['email']
         )
         new_user.set_password(data['password'])  # hash the password before saving
         
-        db.session.add(new_user)  # add user to the database
-        db.session.commit()       # save the changes
+        # save to database
+        db.session.add(new_user)
+        db.session.commit()
         
-        # generate a jwt token for the newly registered user
+        # generate jwt token
         token = jwt.encode({
             'user_id': new_user.id,
             'email': new_user.email,
@@ -51,21 +54,22 @@ def register():
 
 @auth_bp.route('/api/auth/login', methods=['POST'])
 def login():
+    """handle user login and jwt token generation"""
     try:
         data = request.get_json()  # read login data from request
         
-        # check if both email and password were provided
+        # validate required fields
         if not data.get('email') or not data.get('password'):
             return jsonify({'error': 'email and password are required'}), 400
         
-        # look for a user with the given email
+        # find user by email
         user = User.query.filter_by(email=data['email']).first()
         
-        # verify email and password
+        # verify user exists and password matches
         if not user or not user.check_password(data['password']):
             return jsonify({'error': 'invalid email or password'}), 401
         
-        # create a jwt token for the authenticated user
+        # generate jwt token
         token = jwt.encode({
             'user_id': user.id,
             'email': user.email,
@@ -85,26 +89,27 @@ def login():
 
 @auth_bp.route('/api/auth/me', methods=['GET'])
 def get_current_user():
-    token = request.headers.get('Authorization')  # read token from request headers
+    """get current user details from jwt token"""
+    token = request.headers.get('Authorization')
     
-    # make sure the user actually sent a token
+    # check if token exists
     if not token:
         return jsonify({'error': 'authentication token is required'}), 401
     
     try:
-        # remove the 'Bearer ' part if it exists
+        # remove 'Bearer ' prefix if present
         if token.startswith('Bearer '):
             token = token[7:]
             
-        # decode the token and get the payload
+        # decode and verify jwt token
         payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         
-        # find the user using the id inside the token
+        # get user from database
         user = User.query.get(payload['user_id'])
         if not user:
             return jsonify({'error': 'user not found'}), 404
             
-        # return the user info as json
+        # return user details
         return jsonify(user.to_dict()), 200
         
     except jwt.ExpiredSignatureError:
@@ -112,5 +117,4 @@ def get_current_user():
         return jsonify({'error': 'your session has expired, please login again'}), 401
         
     except jwt.InvalidTokenError:
-        # the token is corrupted or fake
         return jsonify({'error': 'invalid authentication token'}), 401
