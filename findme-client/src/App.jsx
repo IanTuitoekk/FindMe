@@ -26,6 +26,23 @@ export default function App() {
     return children;
   }
 
+/**
+ * App entry component.
+ *
+ * Notes:
+ * - Wraps the entire app in AuthProvider so Navbar and all pages can access auth state.
+ * - Keeps routes as before.
+ *
+ * Developer tip: if you want to *see* Report + My Reports in dev without actually logging in,
+ * open the browser console and run:
+ *
+ *   localStorage.setItem('fm_token', 'DEVTOKEN');
+ *
+ * then refresh the page. That will make the auth context find a token and attempt to fetch the user.
+ * (If your backend isn't running, it may clear the token; for a pure mock, see the Navbar dev shortcut.)
+ */
+
+function App() {
   return (
     <Router>
       <Navbar />
